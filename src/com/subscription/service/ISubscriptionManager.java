@@ -1,19 +1,24 @@
 package com.subscription.service;
 
 import com.subscription.model.Customer;
+import com.subscription.model.Invoice;
 import com.subscription.model.Service;
 import com.subscription.model.Subscription;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+
 public interface ISubscriptionManager {
 
-    // --- Management Methods ---
-    Customer createCustomer(String name, String email);
+    // --- Entity Management Methods ---
+    Customer createCustomer(Customer.Builder customerBuilder);
     Service createService(String name, String description);
     Subscription createSubscription(UUID customerId, UUID serviceId);
     void cancelSubscription(UUID subscriptionId);
+    Invoice createInvoiceForSubscription(UUID subscriptionId, BigDecimal amount);
+    void processPayment(UUID invoiceId, BigDecimal amount, String paymentMethod);
 
     // --- Reporting Methods ---
     List<Subscription> getAllActiveSubscriptions();
