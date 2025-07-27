@@ -96,7 +96,7 @@ public final class SubscriptionManager implements ISubscriptionManager {
 
         var invoice = new Invoice(subscription.getCustomerId(), amount, LocalDate.now());
         invoices.put(invoice.getId(), invoice);
-        System.out.printf("✅ Invoice %s created for %s with amount %.2f\n", invoice.getId(), customer.getName(), amount);
+        System.out.printf("Invoice %s created for %s with amount %.2f\n", invoice.getId(), customer.getName(), amount);
 
         // Send notification
         Notification emailNotifier = NotificationFactory.createNotification(NotificationType.EMAIL);

@@ -2,55 +2,56 @@ package com.subscription;
 
 import com.subscription.model.Customer;
 import com.subscription.model.Service;
-import com.subscription.model.Subscription;
 import com.subscription.service.ISubscriptionManager;
 import com.subscription.service.impl.SubscriptionManager;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Starting Subscription Management System...");
+        System.out.println("Starting Integrated Subscription Management System...");
         ISubscriptionManager manager = SubscriptionManager.getInstance();
 
-        // --- 1. Define Customers and Services ---
-        System.out.println("\n--- Step 1: Creating Customers and Services ---");
-        var customer1 = manager.createCustomer("Rahmat Ansari", "rahmat.ansari.dev@gmail.com");
-        var customer2 = manager.createCustomer("Zahra Ekramifar", "zahra.ekramifar@gmail.com");
+        // --- Step 1: Create a Customer using the Builder Pattern ---
+        System.out.println("\n--- 1. Onboarding a new customer ---");
+        var customerBuilder = new Customer.Builder("Rahmat Ansari", "rahmat.ansari.dev@gmail.com")
+                .withPhone("+98-903-085-9525")
+                .withAddress("123 Tech Lane, Silicon Valley");
+        var customer = manager.createCustomer(customerBuilder);
 
-        var service1 = manager.createService("Video Streaming", "Unlimited HD movie streaming.");
-        var service2 = manager.createService("Music Streaming", "Ad-free music library.");
-        var service3 = manager.createService("Cloud Storage", "1TB of secure cloud storage.");
+        // --- Step 2: Define a Service ---
+        System.out.println("\n--- 2. Defining available services ---");
+        Service videoService = manager.createService("Premium Video", "Ad-free 4K video streaming.");
+        Service musicService = manager.createService("Music Unlimited", "Lossless audio streaming.");
 
-        // --- 2. Create Subscriptions ---
-        System.out.println("\n--- Step 2: Creating Subscriptions ---");
-        var sub1 = manager.createSubscription(customer1.id(), service1.id()); // Rahmat -> Video
-        var sub2 = manager.createSubscription(customer1.id(), service2.id()); // Rahmat -> Music
-        var sub3 = manager.createSubscription(customer2.id(), service1.id()); // Zahra   -> Video
-        var sub4 = manager.createSubscription(customer2.id(), service3.id()); // Zahra   -> Cloud
 
-        // --- 3. Reporting: Get All Active Subscriptions ---
-        System.out.println("\n--- Step 3: Reporting All Active Subscriptions ---");
-        List<Subscription> activeSubscriptions = manager.getAllActiveSubscriptions();
-        System.out.printf("Total active subscriptions: %d\n", activeSubscriptions.size());
-        activeSubscriptions.forEach(sub -> System.out.println(" -> " + sub));
+        // --- Step 3: Customer Subscribes to Services ---
+        System.out.println("\n--- 3. Customer subscribes to services ---");
+        var videoSubscription = manager.createSubscription(customer.getId(), videoService.id());
+        var musicSubscription = manager.createSubscription(customer.getId(), musicService.id());
 
-        // --- 4. Cancel a Subscription ---
-        System.out.println("\n--- Step 4: Canceling a Subscription ---");
-        manager.cancelSubscription(sub2.getId()); // Cancel Rahmat's Music subscription
 
-        // --- 5. Reporting: Active Services for a Specific Customer ---
-        System.out.println("\n--- Step 5: Reporting Active Services for Rahmat ---");
-        List<Service> aliceServices = manager.getActiveServicesForCustomer(customer1.id());
-        System.out.println("Rahmat's active services:");
-        aliceServices.forEach(service -> System.out.println(" -> " + service.name()));
+        // --- Step 4: Generate an Invoice for a Subscription ---
+        System.out.println("\n--- 4. Generating a monthly invoice ---");
+        var invoice = manager.createInvoiceForSubscription(videoSubscription.getId(), new BigDecimal("15.99"));
 
-        // --- 6. Reporting: Customers for a Specific Service ---
-        System.out.println("\n--- Step 6: Reporting Customers for Video Streaming Service ---");
-        List<Customer> videoSubscribers = manager.getCustomersSubscribedToService(service1.id());
-        System.out.println("Video Streaming subscribers:");
-        videoSubscribers.forEach(customer -> System.out.println(" -> " + customer.name()));
 
-        System.out.println("\nSystem demonstration complete.");
+        // --- Step 5: Process a Payment for the Invoice ---
+        System.out.println("\n--- 5. Processing a customer payment ---");
+        manager.processPayment(invoice.getId(), new BigDecimal("15.99"), "Credit Card");
+
+
+        // --- Step 6: Customer Cancels One Subscription ---
+        System.out.println("\n--- 6. Customer cancels their video subscription ---");
+        manager.cancelSubscription(videoSubscription.getId());
+
+
+        // --- Step 7: Verify customer's active services ---
+        System.out.println("\n--- 7. Verifying customer's active services ---");
+        var activeServices = manager.getActiveServicesForCustomer(customer.getId());
+        System.out.printf("%s now has %d active subscription(s).\n", customer.getName(), activeServices.size());
+        activeServices.forEach(service -> System.out.println(" -> Active Service: " + service.name()));
+
+        System.out.println("\nSystem workflow demonstration complete!");
     }
 }
